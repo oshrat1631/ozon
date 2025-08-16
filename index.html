@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>משחק שכבת האוזון – כיתה ז׳</title>
+    <style>
+      :root {
+        --bg: #f7fafc;
+        --panel: #ffffff;
+        --card: #f8fafc;
+        --text: #0b1020;
+        --muted: #425466;
+        --accent: #0ea5e9;
+        --accent2: #7c3aed;
+        --good: #16a34a;
+        --bad: #dc2626;
+        --warn: #f59e0b;
+        --focus: #f97316;
+        --radius: 16px;
+        --fs: 16px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: system-ui, -apple-system, Segoe UI, Arial,
+          "Noto Sans Hebrew", Rubik, Heebo, sans-serif;
+        font-size: var(--fs);
+        line-height: 1.6;
+      }
+      a {
+        color: var(--accent);
+      }
+      .app {
+        display: grid;
+        gap: 16px;
+        padding: 16px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      @media (min-width: 992px) {
+        .app {
+          grid-template-columns: minmax(320px, 1fr) minmax(360px, 1.1fr);
+        }
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid #e5e7eb;
+        border-radius: var(--radius);
+        box-shadow: 0 10px 24px #00000010;
+      }
+      .text-panel {
+        position: sticky;
+        top: 0;
+        max-height: 100svh;
+        overflow: auto;
+        padding: 20px;
+      }
+      .text-panel h1 {
+        margin-top: 0;
+        font-size: 1.6rem;
+      }
+      .text-panel h2 {
+        font-size: 1.2rem;
+        margin: 1.2em 0 0.4em;
+      }
+      .text-panel .mark {
+        background: linear-gradient(
+          90deg,
+          rgba(125, 211, 252, 0.35),
+          rgba(167, 139, 250, 0.35)
+        );
+        padding: 0 0.25em;
+        border-radius: 8px;
+      }
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        position: sticky;
+        top: 0;
+        background: var(--panel);
+        padding-bottom: 8px;
+        z-index: 5;
+      }
+      .toolbar .group {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .btn {
+        cursor: pointer;
+        border: 1px solid #cbd5e1;
+        background: var(--card);
+        color: var(--text);
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-weight: 700;
+        box-shadow: 0 2px 0 #00000020;
+        min-height: 40px;
+      }
+      .btn[aria-pressed="true"],
+      .btn.active {
+        outline: 2px solid var(--focus);
+        background: var(--panel);
+        border-color: var(--focus);
+        color: var(--text);
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+      .btn.small {
+        padding: 6px 10px;
+        font-size: 0.9rem;
+        min-height: 36px;
+      }
+      input[type="search"],
+      input[type="text"],
+      select {
+        background: var(--card);
+        border: 1px solid #cbd5e1;
+        color: var(--text);
+        padding: 8px 10px;
+        border-radius: 12px;
+      }
+      .activities {
+        padding: 16px;
+      }
+      .tabs {
+        display: flex;
+        gap: 6px;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 8px;
+        margin-bottom: 12px;
+      }
+      .tab {
+        padding: 8px 12px;
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        background: var(--card);
+        cursor: pointer;
+      }
+      .tab[aria-selected="true"] {
+        outline: 2px solid var(--accent);
+        background: var(--panel);
+        border-color: var(--accent);
+        color: var(--text);
+      }
+      .tabpanels > section {
+        display: none;
+      }
+      .tabpanels > section.active {
+        display: block;
+      }
+      .quiz-card,
+      .match-card,
+      .flash-card {
+        background: var(--card);
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 16px;
+        margin-block: 12px;
+      }
+      .question {
+        font-weight: 700;
+        font-size: 1.05rem;
+      }
+      .answers {
+        display: grid;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .answer-btn {
+        text-align: right;
+        background: var(--card);
+        border: 1px solid #cbd5e1;
+      }
+      .answer-btn.correct {
+        border-color: var(--good);
+        color: var(--good);
+      }
+      .answer-btn.wrong {
+        border-color: var(--bad);
+        color: var(--bad);
+      }
+      .status {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+      .hint {
+        color: var(--accent2);
+        cursor: pointer;
+      }
+      .score {
+        font-weight: 700;
+      }
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      @media (max-width: 480px) {
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+      .chip {
+        background: var(--card);
+        border: 1px dashed #cbd5e1;
+        padding: 6px 10px;
+        border-radius: 10px;
+      }
+      .k-select {
+        outline: 2px dashed transparent;
+      }
+      .k-select[aria-pressed="true"] {
+        outline-color: var(--accent2);
+      }
+      .draggable {
+        user-select: none;
+      }
+      .flash-wrap {
+        display: grid;
+        gap: 12px;
+      }
+      .flash {
+        perspective: 1000px;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 0.5s;
+        min-height: 180px;
+      }
+      .flash .face {
+        background: var(--card);
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 24px;
+        min-height: 110px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        transition: transform 0.5s;
+        transform-style: preserve-3d;
+        position: absolute;
+        inset: 0;
+        backface-visibility: hidden;
+      }
+      .flash .face > span {
+        display: block;
+        transform: translateZ(2px);
+      }
+      .flash-ctrl {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+      .pill {
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: var(--card);
+        border: 1px solid #cbd5e1;
+      }
+      .good {
+        color: var(--good);
+      }
+      .bad {
+        color: var(--bad);
+      }
+      .note {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .feedback {
+        margin-top: 8px;
+      }
+      .feedback.good {
+        color: var(--good);
+      }
+      .feedback.bad {
+        color: var(--warn);
+      }
+      .btn.btn-link {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding: 0 4px;
+        text-decoration: underline;
+        color: var(--accent2);
+        min-height: auto;
+      }
+      .kbd {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas,
+          "Liberation Mono", monospace;
+        font-size: 0.9em;
+        background: var(--card);
+        padding: 2px 6px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+      .highlight {
+        background: #fef08a;
+        color: #0b1020;
+        border-radius: 4px;
+      }
+      .highlight.pulse {
+        outline: 2px solid var(--focus);
+        box-shadow: 0 0 0 6px #f9731640;
+      }
+      .section-title {
+        margin-top: 1.2em;
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+      }
+      .section-title .icon {
+        opacity: 0.8;
+      }
+      .sep {
+        border-top: 1px dashed #2c3a4d;
+        margin: 12px 0;
+      }
+      .topbar {
+        display: none;
+      }
+      @media (max-width: 991px) {
+        .text-panel {
+          position: relative;
+          max-height: none;
+        }
+        .topbar {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px;
+          background: var(--panel);
+          position: sticky;
+          top: 0;
+          z-index: 9;
+          border-bottom: 1px solid #243040;
+        }
+        .collapsible {
+          max-height: 60vh;
+          overflow: auto;
+          transition: max-height 0.3s ease;
+        }
+        .collapsible.closed {
+          max-height: 0;
+          padding: 0 20px;
+          overflow: hidden;
+        }
+      }
+      /* מצבי כרטיסיות */
+      .flash .front {
+        transform: none;
+      }
+      .flash .back {
+        transform: rotateY(180deg);
+      }
+      .flash.flipped {
+        transform: rotateY(180deg);
+      }
+      #flashMeter {
+        background: var(--panel);
+        border: 1px solid #cbd5e1;
+        color: var(--text);
+      }
+      .mobile-hint {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        background: #fff7ed;
+        color: #7c2d12;
+        border: 1px solid #fdba74;
+        padding: 10px 12px;
+        border-radius: 12px;
+        box-shadow: 0 2px 0 #00000010;
+      }
+      .mobile-hint .btn {
+        background: #fff;
+        border-color: #fdba74;
+      }
+      @media (max-width: 991px) {
+        .mobile-hint {
+          display: flex;
+        }
+      }
+      /* כותרות וצביעה לעמודות ההתאמה */
+      #terms::before {
+        content: "מושגים";
+        display: block;
+        color: var(--muted);
+        font-weight: 800;
+        margin: 0 0 6px;
+      }
+      #defs::before {
+        content: "הסברים";
+        display: block;
+        color: var(--muted);
+        font-weight: 800;
+        margin: 0 0 6px;
+      }
+      #terms .chip {
+        border-color: #38bdf8;
+        background: #f0f9ff;
+      }
+      #defs .chip {
+        border-color: #c4b5fd;
+        background: #f5f3ff;
+      }
+      .k-select[aria-pressed="true"] {
+        outline-color: var(--accent2);
+        box-shadow: 0 0 0 3px #ede9fe inset;
+      }
+      .app,
+      body,
+      html {
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+      .panel,
+      .tabpanels,
+      #textContainer,
+      #article {
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+      #article,
+      #article * {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      .btn,
+      .chip,
+      .tab {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      }
+      /* שיפורי מובייל לכרטיסיות */
+      @media (max-width: 600px) {
+        .flash {
+          min-height: 150px;
+        }
+        .flash .face {
+          padding: 16px;
+          font-size: clamp(1rem, 3.8vw, 1.15rem);
+          text-align: center;
+        }
+      }
+      /* שיפורי מובייל להתאמות */
+      @media (max-width: 600px) {
+        #matchGrid .btn.chip {
+          min-height: 44px;
+          font-size: 1rem;
+        }
+      }
+      /* Mobile polish */
+      @media (max-width: 600px) {
+        .status {
+          flex-wrap: wrap;
+          align-items: flex-start;
+          gap: 6px;
+        }
+        .status .group {
+          margin-inline-start: auto;
+        }
+        .note {
+          white-space: normal;
+        }
+        .mobile-hint {
+          flex-wrap: wrap;
+          align-items: flex-start;
+          width: 100%;
+          white-space: normal;
+          word-break: normal;
+          overflow-wrap: anywhere;
+          line-height: 1.5;
+        }
+        .mobile-hint .kbd {
+          white-space: nowrap;
+        }
+        .match-card,
+        #matchGrid,
+        #terms,
+        #defs {
+          position: relative;
+          z-index: 2;
+        }
+        .flash {
+          z-index: 0;
+        }
+        #matchGrid .btn.chip {
+          width: 100%;
+          min-height: 44px;
+          font-size: 1rem;
+        }
+      }
+      /* חיפוש: הדגשה בלבד – בלי חיצים */
+      #prevHit,
+      #nextHit,
+      #prevHit2,
+      #nextHit2 {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app" id="app">
+      <div class="activities panel" id="activities" aria-label="איזור פעילויות">
+        <div class="toolbar" role="toolbar" aria-label="סרגל כלים">
+          <div class="group">
+            <button class="btn small" id="a11yPlus" aria-label="הגדל טקסט">
+              A+
+            </button>
+            <button class="btn small" id="a11yMinus" aria-label="הקטן טקסט">
+              A−
+            </button>
+            <button class="btn small" id="reset" aria-label="איפוס משחק">
+              איפוס ♻️
+            </button>
+          </div>
+          <div class="group">
+            <span class="note">התקדמות נשמרת במכשיר שלך 🧠</span>
+          </div>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="בחירת פעילות">
+          <button
+            class="tab"
+            role="tab"
+            aria-selected="true"
+            aria-controls="panel-quiz"
+            id="tab-quiz"
+          >
+            🧠 חידון
+          </button>
+          <button
+            class="tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="panel-match"
+            id="tab-match"
+          >
+            🧩 התאמות
+          </button>
+          <button
+            class="tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="panel-flash"
+            id="tab-flash"
+          >
+            ⭐ כרטיסיות
+          </button>
+        </div>
+
+        <div class="mobile-hint" id="mobileHint" role="status">
+          📖 בטלפון: הטקסט המלא נמצא <strong>מתחת לפעילויות</strong>. אפשר לגלול
+          למטה או ללחוץ על <span class="kbd">רמז</span> כדי לקפוץ למקום
+          הרלוונטי.
+          <button class="btn small" id="hideHint" aria-label="הסתרת הסבר">
+            הבנתי ✔︎
+          </button>
+        </div>
+
+        <div class="tabpanels">
+          <section
+            id="panel-quiz"
+            class="active"
+            role="tabpanel"
+            aria-labelledby="tab-quiz"
+          >
+            <div class="quiz-card" id="quizCard">
+              <div class="status">
+                <span id="qCounter">שאלה 1 / 30</span
+                ><span class="score" id="score">⭐ 0</span>
+              </div>
+              <div class="question" id="questionText">—</div>
+              <div class="answers" id="answers"></div>
+              <div id="feedback" class="note feedback" aria-live="polite"></div>
+              <div class="sep"></div>
+              <div class="status">
+                <button
+                  class="btn small"
+                  id="btnHint"
+                  aria-label="רמז – גלול לטקסט הרלוונטי"
+                >
+                  🔍 רמז
+                </button>
+                <button
+                  class="btn small"
+                  id="btnShuffle"
+                  aria-label="ערבוב סדר השאלות"
+                >
+                  🔀 ערבב שאלות
+                </button>
+                <div class="group">
+                  <button class="btn small" id="btnPrev">⬅︎ קודם</button>
+                  <button class="btn small" id="btnNext">הבא ➤</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="panel-match" role="tabpanel" aria-labelledby="tab-match">
+            <div class="match-card">
+              <div class="status">
+                <span>התאם מושגים להסברים</span
+                ><span id="matchStatus" class="score">0/10</span>
+              </div>
+              <div class="grid-2" id="matchGrid">
+                <div id="terms" aria-label="רשימת מושגים"></div>
+                <div id="defs" aria-label="רשימת הסברים"></div>
+              </div>
+              <div class="sep"></div>
+              <div class="note" id="matchNote">
+                אפשר לגרור בעכבר או לבחור עם מקלדת: בחר מושג (Enter), ואז הסבר
+                (Enter). ✅
+              </div>
+            </div>
+          </section>
+
+          <section id="panel-flash" role="tabpanel" aria-labelledby="tab-flash">
+            <div class="flash-wrap">
+              <div class="flash" id="flash">
+                <div class="face front" id="flashFront">
+                  <span>לחצי/הקש Enter כדי להפוך כרטיסייה 🔄</span>
+                </div>
+                <div class="face back" id="flashBack"><span></span></div>
+              </div>
+              <div class="flash-ctrl">
+                <button class="btn" id="flashPrev" aria-label="כרטיס קודם">
+                  ⟵ קודם
+                </button>
+                <button class="btn" id="flashFlip" aria-label="הפוך כרטיס">
+                  הפוך 🔄
+                </button>
+                <button class="btn" id="flashNext" aria-label="כרטיס הבא">
+                  הבא ⟶
+                </button>
+                <span class="pill" id="flashMeter">1 / 10</span>
+                <button class="btn" id="flashIKnow">אני יודע/ת ✓</button>
+                <button class="btn" id="flashIDont">עדיין לא ✗</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <aside class="panel text-panel" id="textPanel" aria-label="טקסט למידה">
+        <div class="topbar">
+          <button class="btn" id="toggleText">הצג/הסתר טקסט 📖</button>
+          <div class="group">
+            <input
+              type="search"
+              id="search"
+              placeholder="חיפוש בטקסט…"
+              aria-label="חיפוש בטקסט"
+            />
+            <button class="btn small" id="clear1" title="ניקוי חיפוש">
+              ✖︎
+            </button>
+            <button class="btn small" id="prevHit" title="חזרה">⟸</button>
+            <button class="btn small" id="nextHit" title="קדימה">⟹</button>
+            <span class="note" id="hitMeter">נמצאו: 0</span>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="group">
+            <input
+              type="search"
+              id="search2"
+              placeholder="חיפוש בטקסט…"
+              aria-label="חיפוש בטקסט"
+            />
+            <button class="btn small" id="clear2" title="ניקוי חיפוש">
+              ✖︎
+            </button>
+            <button class="btn small" id="prevHit2" title="חזרה">⟸</button>
+            <button class="btn small" id="nextHit2" title="קדימה">⟹</button>
+            <span class="note" id="hitMeter2">נמצאו: 0</span>
+          </div>
+          <div class="group">
+            <span class="note">טקסט תמיד זמין לעזרה 🔍</span>
+          </div>
+        </div>
+
+        <div id="textContainer" class="collapsible">
+          <article id="article">
+            <h1 id="title">שכבת האוזון</h1>
+            <h2 id="intro" class="section-title">
+              <span class="icon">🌍</span>מבוא
+            </h2>
+            <p>
+              שכבת האוזון היא מגן החיים של כדור הארץ. היא בולעת את רוב הקרינה
+              העל־סגולה (UV; סוג של קרינת שמש בעלת אורך גל קצר שמזיק לתאים)
+              שמגיעה מן השמש ושעלולה לפגוע בתאי הגוף וב־DNA (החומר התורשתי
+              שבתאים), לגרום למחלות עור ולעיניים ולהזיק גם לבעלי חיים ולצמחים.
+              בלי ההגנה הזאת החיים ביבשה היו מתקשים מאוד להתפתח.
+            </p>
+            <h2 id="whatwhere" class="section-title">
+              <span class="icon">🧪</span>מהו אוזון ואיפה הוא נמצא
+            </h2>
+            <p>
+              האוזון עצמו הוא גז חסר צבע ובעל ריח חריף, שמורכב משלושה אטומי חמצן
+              ומסומן O3 (הסימון הכימי של אוזון). באטמוספרה (מעטפת הגזים שמקיפה
+              את כדור הארץ) כולה יש ממנו מעט, ורובו נמצא בסטרטוספרה (השכבה
+              האמצעית של האטמוספרה), בערך בין 10 ל־50 ק"מ מעל פני הקרקע, כאשר
+              שכבת האוזון מרוכזת במיוחד בגבהים של כ־15-35 ק"מ.
+            </p>
+            <p>
+              שם, בעזרת קרינת ה־UV מן השמש, מתרחש מעגל טבעי: מולקולות חמצן
+              רגילות O2 (שני אטומי חמצן קשורים) מתפרקות לשני אטומי חמצן בודדים;
+              כל אטום (היחידה הבסיסית של יסוד כימי) מגיב במהירות עם O2 סמוכה
+              ונוצרת מולקולת אוזון. אותה קרינה גם מפרקת שוב את האוזון ל־O2
+              ולאטום חמצן. יצירה ופירוק מתרחשים כל הזמן, ולכן עובי השכבה משתנה
+              לפי עונות השנה וקווי הרוחב (המרחק מהקו המשווה). מעל אנטארקטיקה
+              ההידלדלות מגיעה לשיאה בדרך כלל בחודש אוקטובר.
+            </p>
+            <h2 id="layers" class="section-title">
+              <span class="icon">🪐</span>שכבות האטמוספרה בקצרה
+            </h2>
+            <p>
+              כדי שיהיה ברור איך הכול מסודר, האטמוספרה מחולקת לחמש שכבות עיקריות
+              לפי גובה ושינויי טמפרטורה. הקרובה לפני הקרקע נקראת טרופוספרה (0–10
+              עד 12 ק"מ; שכבת מזג האוויר שבה נוצרים עננים, גשם ורוחות, והיא
+              מכילה את רוב אדי המים). מעליה נמצאת הסטרטוספרה (בערך 10–50 ק"מ;
+              שכבה יציבה יחסית שבה מצויה שכבת האוזון וסילוני נוסעים טסים לעתים
+              בשוליה העליונים). מעליה המזוספרה (כ־50–85 ק"מ; שכבה קרה מאוד שבה
+              רוב המטאורים נשרפים ונראים כ"כוכבים נופלים"). מעל המזוספרה מתחילה
+              התרמוספרה (בערך 85–600 ק"מ; שכבה דלילה וחמה מאוד שבה מתרחשים זוהרי
+              הקוטב, ובגובה של כ־400 ק"מ מקיפה את כדור הארץ תחנת החלל
+              הבינלאומית). הגבוהה מכולן היא האקסוספרה (בערך 600–10,000 ק"מ; מעבר
+              הדרגתי לחלל שבו מולקולות מעטות יכולות לברוח לשכבות הגבוהות). גבול
+              שימושי שמזכירים לעתים הוא קו קרמן בגובה של כ־100 ק"מ (הגדרה מוסכמת
+              בקירוב לתחילת "החלל" לצורכי תעופה וחלל), והוא נמצא עמוק בתוך
+              התרמוספרה. לסיכום: שכבת האוזון שייכת לסטרטוספרה, אחת מתוך חמש
+              שכבות האטמוספרה.
+            </p>
+            <h2 id="protect" class="section-title">
+              <span class="icon">🛡️</span>איך שכבת האוזון מגינה עלינו
+            </h2>
+            <p>
+              ההגנה שאנו מקבלים נובעת מהבליעה היעילה של הקרינה המסוכנת. קרינת
+              UVC (תחום ה־UV הקצר והמסוכן ביותר) נחסמת כמעט לגמרי עוד בשכבת
+              האוזון. קרינת UVB (תחום בינוני באורך הגל ובעוצמת הסיכון) נחסמת
+              ברובה, אך חלק ממנה מגיע לקרקע ועלול להזיק. קרינת UVA (תחום ארוך־גל
+              יחסית) היא ארוכת גל יותר ולכן פחות נספגת באוזון; היא תורמת
+              להזדקנות העור ולנזקים מצטברים, אך אינה נראית לעין. האור הסגול
+              שרואים במועדונים הוא אור נראה שגורם לחומרים לזהור, לא קרינת UVA
+              עצמה. כאשר מולקולת אוזון סופגת UV היא מתפרקת, אולם בזכות המעגל
+              הטבעי היא נבנית מחדש במהירות ונשמר איזון.
+            </p>
+            <h2 id="hole" class="section-title">
+              <span class="icon">🕳️</span>מהו "החור באוזון"
+            </h2>
+            <p>
+              בשנות ה־80 גילו חוקרים דלדול חריג של אוזון מעל אנטארקטיקה. תמונות
+              לוויין הציגו אזור דל באוזון, ומכאן הכינוי "החור באוזון". אין כאן
+              חור ממשי, אלא ירידה גדולה בכמות האוזון באזור מסוים. המקור העיקרי
+              להפרת האיזון היה פליטה של תרכובות תעשייתיות שנקראות CFCs
+              (כלורו־פלואורו־פחמנים; גזי קירור וחומרי דחף שנפוצו בעבר), ששימשו
+              בעבר במקררים, במזגנים ובתרסיסים. בסטרטוספרה, באור השמש, מולקולות
+              אלה מתפרקות ומשחררות אטומי כלור ולעיתים גם ברום. האטומים הללו
+              נכנסים לשרשראות תגובה שמפרקות עוד ועוד מולקולות אוזון. בקור
+              הקיצוני שמעל הקטבים נוצרים עננים סטרטוספריים קוטביים, שעל פניהם
+              משתחררות צורות כלור פעילות במיוחד, ולכן הדלדלות האוזון שם חזקה
+              יותר.
+            </p>
+            <h2 id="protocol" class="section-title">
+              <span class="icon">📜</span>תגובת העולם: פרוטוקול מונטריאול
+            </h2>
+            <p>
+              התגובה הבין־לאומית הייתה מהירה ונחושה. ב־16 בספטמבר 1987 נחתם
+              פרוטוקול מונטריאול, אמנה שחייבה הפחתה והפסקה מדורגת של ייצור
+              ושימוש ברוב הכימיקלים הפוגעים באוזון. כמעט כל מדינות העולם אימצו
+              אותה, ועל תרומתם להבנת הכימיה האטמוספרית הוענק ב־1995 פרס נובל
+              לכימיה לשרווד רולנד, מריו מולינה ופול קרוצן.
+            </p>
+            <h2 id="status" class="section-title">
+              <span class="icon">📈</span>המצב היום ומה הלאה
+            </h2>
+            <p>
+              מאז שנות ה־90 המדידות מצביעות על התאוששות הדרגתית. בשנים שונות
+              גודל ה"חור" משתנה בגלל תנאים מטאורולוגיים, אך המגמה ארוכת הטווח
+              חיובית. לפי דוחות בין־לאומיים, שכבת האוזון מעל אנטארקטיקה צפויה
+              להתקרב למצבה שלפני הפגיעה בשנות ה־60 של המאה ה־21, וההתאוששות
+              הגלובלית תימשך אל תוך אמצע־סוף המאה. עם זאת, יש צורך בהמשך אכיפה
+              ומעקב כדי למנוע פליטות לא חוקיות.
+            </p>
+            <h2 id="note" class="section-title">
+              <span class="icon">💡</span>נקודה חשובה
+            </h2>
+            <p>
+              חשוב לדעת שאין "חור ענק באטמוספרה" שדרכו האוויר בורח לחלל.
+              האטמוספרה מוחזקת בכבידה של כדור הארץ, והדלדלות האוזון קשורה לסינון
+              הקרינה בלבד. בישראל אפשר להתעדכן במדד ה־UV שמפרסם השירות
+              המטאורולוגי, כדי להחליט כיצד להגן על העור והעיניים.
+            </p>
+            <h2 id="summary" class="section-title">
+              <span class="icon">✅</span>סיכום
+            </h2>
+            <p>
+              השורה התחתונה: שכבת האוזון מגינה עלינו, נפגעה במשך שנים עקב פעילות
+              האדם, וכעת מתאוששת בזכות פעולה עולמית משותפת. ממשיכים להישמר מהשמש
+              ולתמוך במדיניות שמגנה על האטמוספרה, וכך שומרים על הבריאות של
+              כולנו.
+            </p>
+          </article>
+        </div>
+      </aside>
+    </div>
+
+    <script>
+      // ====== נתונים ======
+      const QUESTION_BANK = [
+        {
+          q: "מהו התפקיד העיקרי של שכבת האוזון על פי הטקסט?",
+          a: [
+            "לסנן את הקרינה העל־סגולה המזיקה",
+            "לשחרר חמצן לנשימה",
+            "להעלות טמפרטורת הקרקע",
+            "לספוג פחמן דו־חמצני",
+          ],
+          correct: 0,
+          ref: "#protect",
+        },
+        {
+          q: "מהי מולקולת אוזון וכיצד היא מסומנת בנוסחה כימית?",
+          a: [
+            "גז משלושה אטומי חמצן – O3",
+            "שני אטומי חמצן – O2",
+            "פחמן דו־חמצני – CO2",
+            "H2O",
+          ],
+          correct: 0,
+          ref: "#whatwhere",
+        },
+        {
+          q: "היכן נמצאת רוב כמות האוזון ובאיזה תחום גבהים נמצאת הסטרטוספרה?",
+          a: [
+            "בסטרטוספרה, בערך 10–50 ק״מ",
+            "בטרופוספרה, 0–10 ק״מ",
+            "במזוספרה, 50–85 ק״מ",
+            "בתרמוספרה, 85–600 ק״מ",
+          ],
+          correct: 0,
+          ref: "#whatwhere",
+        },
+        {
+          q: "באילו גבהים מרוכזת במיוחד שכבת האוזון?",
+          a: ["כ־15–35 ק״מ", "0–10 ק״מ", "50–85 ק״מ", "600–10,000 ק״מ"],
+          correct: 0,
+          ref: "#whatwhere",
+        },
+        {
+          q: "מה קורה למולקולות O2 כאשר הן סופגות קרינת UV?",
+          a: [
+            "מתפרקות לשני אטומי חמצן",
+            "הופכות ל־O3 מיד",
+            "מתאדות לחלל",
+            "שום דבר – אינן מגיבות",
+          ],
+          correct: 0,
+          ref: "#whatwhere",
+        },
+        {
+          q: "מדוע עובי שכבת האוזון משתנה לפי עונות וקווי רוחב?",
+          a: [
+            "כי היצירה והפירוק תלויים בעוצמת השמש",
+            "כי הרוחות תמיד דוחפות אוזון לקטבים",
+            "כי הימים ארוכים יותר בקיץ",
+            "בגלל גשם",
+          ],
+          correct: 0,
+          ref: "#whatwhere",
+        },
+        {
+          q: "באיזה חודש מגיעה ההידלדלות מעל אנטארקטיקה לשיאה בדרך כלל?",
+          a: ["אוקטובר", "יולי", "מרץ", "ינואר"],
+          correct: 0,
+          ref: "#whatwhere",
+        },
+        {
+          q: "מנה את שכבות האטמוספרה מהקרקע כלפי מעלה.",
+          a: [
+            "טרופו, סטרטו, מזו, תרמו, אקסו",
+            "סטרטו, טרופו, תרמו, מזו, אקסו",
+            "מזו, טרופו, אקסו, תרמו, סטרטו",
+            "טרופו, מזו, סטרטו, תרמו, אקסו",
+          ],
+          correct: 0,
+          ref: "#layers",
+        },
+        {
+          q: "איזו שכבה נקראת שכבת מזג האוויר?",
+          a: ["טרופוספרה", "סטרטוספרה", "מזוספרה", "תרמוספרה"],
+          correct: 0,
+          ref: "#layers",
+        },
+        {
+          q: "באיזו שכבה נמצאת שכבת האוזון?",
+          a: ["סטרטוספרה", "טרופוספרה", "מזוספרה", "תרמוספרה"],
+          correct: 0,
+          ref: "#layers",
+        },
+        {
+          q: "באיזו שכבה רוב המטאורים נשרפים?",
+          a: ["מזוספרה", "טרופוספרה", "סטרטוספרה", "אקסוספרה"],
+          correct: 0,
+          ref: "#layers",
+        },
+        {
+          q: "באיזו שכבה מתרחשים זוהרי הקוטב, ובאיזה גובה בערך מקיפה תחנת החלל?",
+          a: [
+            "בתרמוספרה; סביב 400 ק״מ",
+            "במזוספרה; סביב 100 ק״מ",
+            "בטרופוספרה; סביב 10 ק״מ",
+            "בסטרטוספרה; סביב 50 ק״מ",
+          ],
+          correct: 0,
+          ref: "#layers",
+        },
+        {
+          q: "מהו קו קרמן ועל איזה גובה הוא נמצא?",
+          a: [
+            'גבול שימושי לתחילת "החלל" כ־100 ק״מ',
+            "גבול בין טרופו לסטרטו כ־10 ק״מ",
+            "קו רוחב 0° על קו המשווה",
+            "שם לזרם סילון",
+          ],
+          correct: 0,
+          ref: "#layers",
+        },
+        {
+          q: "איזו קרינת UV נחסמת כמעט לגמרי בשכבת האוזון?",
+          a: ["UVC", "UVB", "UVA", "כולן מגיעות לקרקע"],
+          correct: 0,
+          ref: "#protect",
+        },
+        {
+          q: "איזו קרינת UV נחסמת ברובה אך חלק ממנה מגיע לקרקע?",
+          a: ["UVB", "UVC", "UVA", "אין מידע"],
+          correct: 0,
+          ref: "#protect",
+        },
+        {
+          q: "מה נכון לגבי קרינת UVA?",
+          a: [
+            "ארוכת־גל, חודרת יותר ואינה נראית לעין",
+            "המסוכנת ביותר ונחסמת לגמרי",
+            "קצרה מ־UVC",
+            "גורמת תמיד לקור",
+          ],
+          correct: 0,
+          ref: "#protect",
+        },
+        {
+          q: "מדוע האור הסגול במועדונים אינו UVA?",
+          a: [
+            "זה אור נראה שגורם לפלואורסנציה",
+            "כי UVA לא קיים בעיר",
+            "כי האוזון הופך אותו לירוק",
+            "כי זו תופעה של חור באוזון",
+          ],
+          correct: 0,
+          ref: "#protect",
+        },
+        {
+          q: 'מה פירוש הביטוי "החור באוזון"?',
+          a: [
+            "דלדול בכמות האוזון באזור מסוים",
+            "חור אמיתי באטמוספרה",
+            "היעדר חמצן לנשימה",
+            "סערה אטמוספרית",
+          ],
+          correct: 0,
+          ref: "#hole",
+        },
+        {
+          q: "אילו חומרים תרמו להידלדלות ומהם שימושיהם?",
+          a: [
+            "CFCs; מקררים/מזגנים/תרסיסים",
+            "CO2; נשימות וצמחים",
+            "N2; תאורה",
+            "SO2; גשם",
+          ],
+          correct: 0,
+          ref: "#hole",
+        },
+        {
+          q: "מה משתחרר ממולקולות CFC בסטרטוספרה?",
+          a: [
+            "אטומי כלור פעילים שמפרקים אוזון",
+            "אדי מים שמגבירים עננות",
+            "חנקן שמגן על האוזון",
+            "הליום",
+          ],
+          correct: 0,
+          ref: "#hole",
+        },
+        {
+          q: "מה תפקידם של עננים סטרטוספריים קוטביים?",
+          a: [
+            "מאיצים שחרור כלור פעיל ופירוק אוזון",
+            "בולמים רוח",
+            "מחזירים חום לקרקע",
+            "יוצרים גשם טרופי",
+          ],
+          correct: 0,
+          ref: "#hole",
+        },
+        {
+          q: "מהו פרוטוקול מונטריאול?",
+          a: [
+            "אמנה מ־1987 לצמצום חומרים פוגעי־אוזון",
+            "שמו של לוויין",
+            "סוג של ענן",
+            "חומר קירור חלופי",
+          ],
+          correct: 0,
+          ref: "#protocol",
+        },
+        {
+          q: "מי קיבלו פרס נובל ב־1995 בהקשר זה?",
+          a: [
+            "רולנד, מולינה וקרוצן",
+            "ניוטון, איינשטיין וקריק",
+            "טסלה, אדיסון ומרקוני",
+            "דרווין, ווטסון וקריק",
+          ],
+          correct: 0,
+          ref: "#protocol",
+        },
+        {
+          q: "מהי המגמה מאז שנות ה־90?",
+          a: [
+            "התאוששות הדרגתית",
+            "הרעה מתמשכת",
+            "אין שינוי",
+            "התאוששות ואז קריסה",
+          ],
+          correct: 0,
+          ref: "#status",
+        },
+        {
+          q: "מה עדיין נדרש כדי לשמור על המגמה?",
+          a: [
+            "אכיפה ומעקב נגד פליטות לא חוקיות",
+            "סגירת כל המפעלים",
+            "הפסקת טיסות לחלוטין",
+            "אין צורך בפעולה",
+          ],
+          correct: 0,
+          ref: "#status",
+        },
+        {
+          q: "איזו טעות נפוצה הטקסט מפריך?",
+          a: [
+            "שקיים חור שדרכו דולף חמצן",
+            "ש־UVC מועילה לשיזוף",
+            "שאין שכבת אוזון כלל",
+            "שהאטמוספרה אינה תלויה בכבידה",
+          ],
+          correct: 0,
+          ref: "#note",
+        },
+        {
+          q: "מהו מדד ה־UV ולמה הוא שימושי בישראל?",
+          a: [
+            "מספר חסר יחידות לעוצמת קרינה; לתכנון הגנה",
+            "מדד איכות אוויר; לבדיקת זיהום",
+            "מדד גשם; לתכנון טיולים",
+            "מדד חום; לבחירת ביגוד",
+          ],
+          correct: 0,
+          ref: "#note",
+        },
+        {
+          q: "מהו המסר המסכם של הטקסט?",
+          a: [
+            "השכבה מתאוששת בזכות פעולה עולמית וצריך להמשיך להיזהר",
+            "הכול אבוד ואין מה לעשות",
+            "אין קשר בין בני אדם לשכבת האוזון",
+            "יש להפסיק להשתמש בחמצן",
+          ],
+          correct: 0,
+          ref: "#summary",
+        },
+        {
+          q: "השלם: האטמוספרה מוחזקת ב_____ של כדור הארץ.",
+          a: ["כבידה", "מגנטיות", "רוח", "גשם"],
+          correct: 0,
+          ref: "#note",
+        },
+        {
+          q: "מה תחום הגבהים של התרמוספרה?",
+          a: ["כ־85–600 ק״מ", "כ־10–50 ק״מ", "כ־50–85 ק״מ", "כ־0–10 ק״מ"],
+          correct: 0,
+          ref: "#layers",
+        },
+      ];
+      const MATCH_PAIRS = [
+        ["אוזון (O3)", "גז משלושה אטומי חמצן שמגן מקרינת UV"],
+        ["סטרטוספרה", 'שכבה יציבה כ־10–50 ק"מ ובה מרוכז האוזון'],
+        ["טרופוספרה", 'שכבת מזג האוויר, 0–10/12 ק"מ'],
+        ["מזוספרה", "בה רוב המטאורים נשרפים"],
+        ["תרמוספרה", 'דלילה וחמה; זוהרי הקוטב; ISS סביב 400 ק"מ'],
+        ["אקסוספרה", '600–10,000 ק"מ; מעבר לחלל'],
+        ["UVC", "נחסמת כמעט לגמרי"],
+        ["UVB", "נחסמת ברובה; חלק מגיע לקרקע"],
+        ["UVA", "ארוכת־גל, חודרת יותר, אינה נראית"],
+        ["CFCs", "תרכובות תעשייתיות שפוגעות באוזון"],
+      ];
+      const FLASH_TERMS = [
+        { term: "אוזון (O3)", def: "גז משלושה אטומי חמצן שמגן מקרינת UV" },
+        { term: "סטרטוספרה", def: 'שכבה יציבה כ־10–50 ק"מ ובה מרוכז האוזון' },
+        {
+          term: "UVC/UVB/UVA",
+          def: "חלוקת UV: UVC נחסמת כמעט לגמרי; UVB ברובה; UVA חודרת יותר",
+        },
+        {
+          term: "CFCs",
+          def: "כלורו־פלואורו־פחמנים; פוגעים באוזון (מקררים/מזגנים/תרסיסים)",
+        },
+        {
+          term: "עננים סטרטוספריים קוטביים",
+          def: "עננים קרים מאוד שמאיצים פירוק אוזון",
+        },
+        {
+          term: "פרוטוקול מונטריאול",
+          def: "אמנה מ־1987 לצמצום חומרים פוגעי־אוזון",
+        },
+        { term: 'קו קרמן (כ־100 ק"מ)', def: 'גבול שימושי לתחילת "החלל"' },
+        { term: "מזוספרה", def: "שכבה קרה; מטאורים נשרפים בה" },
+        { term: "תרמוספרה", def: 'דלילה וחמה; זוהרי הקוטב; ISS כ־400 ק"מ' },
+        { term: "טרופוספרה", def: "שכבת מזג האוויר; רוב אדי המים" },
+      ];
+
+      // ====== עזרים ======
+      const $ = (sel, ctx = document) => ctx.querySelector(sel);
+      const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
+      const canDrag =
+        window.matchMedia("(pointer:fine)").matches &&
+        !("ontouchstart" in window);
+      const root = document.documentElement;
+
+      // נגישות טקסט
+      $("#a11yPlus").addEventListener("click", () => {
+        let fs =
+          parseFloat(getComputedStyle(root).getPropertyValue("--fs")) || 16;
+        root.style.setProperty("--fs", fs + 1 + "px");
+        saveState();
+      });
+      $("#a11yMinus").addEventListener("click", () => {
+        let fs =
+          parseFloat(getComputedStyle(root).getPropertyValue("--fs")) || 16;
+        root.style.setProperty("--fs", Math.max(12, fs - 1) + "px");
+        saveState();
+      });
+
+      // ====== חיפוש בטקסט ======
+      let hits = [],
+        hitIndex = 0,
+        lastQuery = "";
+      function clearHighlights() {
+        $$("#article .highlight").forEach((m) => {
+          const p = m.parentNode;
+          p.replaceChild(document.createTextNode(m.textContent), m);
+          p.normalize();
+        });
+      }
+      function doSearch(q) {
+        clearHighlights();
+        hits = [];
+        hitIndex = 0;
+        if (!q) {
+          lastQuery = "";
+          updateHitMeters();
+          return;
+        }
+        const query = q.normalize("NFC");
+        lastQuery = query;
+        // Escape כל התווים המיוחדים של RegExp, כולל backslash וסוגריים מרובעים
+        const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const re = new RegExp(escaped, "gi");
+        const walker = document.createTreeWalker(
+          $("#article"),
+          NodeFilter.SHOW_TEXT,
+          null
+        );
+        const nodes = [];
+        let node;
+        while ((node = walker.nextNode())) {
+          nodes.push(node);
+        }
+        nodes.forEach((node) => {
+          const orig = node.nodeValue;
+          const text = orig.normalize("NFC");
+          if (!re.test(text)) return;
+          re.lastIndex = 0;
+          const frag = document.createDocumentFragment();
+          let last = 0,
+            match;
+          while ((match = re.exec(text)) !== null) {
+            if (match.index > last) {
+              frag.appendChild(
+                document.createTextNode(orig.slice(last, match.index))
+              );
+            }
+            const mark = document.createElement("mark");
+            mark.className = "highlight";
+            mark.textContent = orig.slice(
+              match.index,
+              match.index + match[0].length
+            );
+            frag.appendChild(mark);
+            hits.push(mark);
+            last = match.index + match[0].length;
+          }
+          if (last < orig.length) {
+            frag.appendChild(document.createTextNode(orig.slice(last)));
+          }
+          node.parentNode.replaceChild(frag, node);
+        });
+        if (hits.length) {
+          hitIndex = 0;
+          hits[0].scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "nearest",
+          });
+          pulseHit();
+        }
+        updateHitMeters();
+      }
+      function updateHitMeters() {
+        ["#hitMeter", "#hitMeter2"].forEach((id) => {
+          const el = $(id);
+          if (el) el.textContent = "נמצאו: " + (hits.length || 0);
+        });
+      }
+      function gotoHit(dir) {
+        if (!hits.length) return;
+        hitIndex = (hitIndex + dir + hits.length) % hits.length;
+        hits[hitIndex].scrollIntoView({ behavior: "smooth", block: "center" });
+        updateHitMeters();
+        pulseHit();
+      }
+      function pulseHit() {
+        const cur = hits[hitIndex];
+        if (cur) {
+          cur.classList.add("pulse");
+          setTimeout(() => cur.classList.remove("pulse"), 700);
+        }
+      }
+      ["#search", "#search2"].forEach((id) => {
+        const el = $(id);
+        if (!el) return;
+        const handler = () => doSearch(el.value);
+        el.addEventListener("input", handler);
+        el.addEventListener("change", handler);
+        el.addEventListener("search", handler);
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            const val = el.value.trim();
+            if (val && val !== lastQuery) {
+              doSearch(val);
+            } else if (hits.length) {
+              gotoHit(1);
+            }
+          }
+        });
+      });
+      function resetSearchInputs() {
+        ["#search", "#search2"].forEach((sel) => {
+          const el = $(sel);
+          if (el) el.value = "";
+        });
+        clearHighlights();
+        hits = [];
+        hitIndex = 0;
+        lastQuery = "";
+        updateHitMeters();
+      }
+      ["#clear1", "#clear2"].forEach((id) => {
+        const el = $(id);
+        if (el) el.addEventListener("click", resetSearchInputs);
+      });
+      const tc = $("#textContainer");
+      const tgl = $("#toggleText");
+      if (tgl) {
+        tgl.addEventListener("click", () => tc.classList.toggle("closed"));
+      }
+
+      // ====== חידון ======
+      const qText = $("#questionText"),
+        qAns = $("#answers"),
+        qCount = $("#qCounter"),
+        scoreEl = $("#score");
+      let qIndex = 0,
+        score = 0,
+        answered = false,
+        qOrder = [],
+        streak = 0;
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+      function renderQuestion() {
+        const q = QUESTION_BANK[qOrder[qIndex]];
+        qText.textContent = q.q;
+        qCount.textContent = `שאלה ${qIndex + 1} / ${QUESTION_BANK.length}`;
+        qAns.innerHTML = "";
+        const order = shuffle(q.a.map((_, i) => i));
+        order.forEach((ansIdx) => {
+          const btn = document.createElement("button");
+          btn.className = "btn answer-btn";
+          btn.setAttribute("role", "radio");
+          btn.setAttribute("aria-checked", "false");
+          btn.textContent = q.a[ansIdx];
+          if (ansIdx === q.correct) btn.dataset.correct = "1";
+          btn.addEventListener("click", () => choose(btn));
+          btn.addEventListener("keyup", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              choose(btn);
+            }
+          });
+          qAns.appendChild(btn);
+        });
+        answered = false;
+        feedbackMsg("בחרו תשובה…", "info");
+        saveState();
+      }
+      function feedbackMsg(text, type = "info", withHint = false) {
+        const el = $("#feedback");
+        if (!el) return;
+        el.className = "note feedback " + type;
+        el.innerHTML = "";
+        const span = document.createElement("span");
+        span.textContent = text;
+        el.appendChild(span);
+        if (withHint) {
+          const btn = document.createElement("button");
+          btn.className = "btn btn-link";
+          btn.type = "button";
+          btn.textContent = "רמז קטן";
+          btn.addEventListener("click", () => {
+            const current = QUESTION_BANK[qOrder[qIndex]];
+            const el2 = $(current.ref);
+            if (el2) {
+              el2.classList.add("mark");
+              el2.scrollIntoView({ behavior: "smooth", block: "start" });
+              setTimeout(() => el2.classList.remove("mark"), 1400);
+            }
+          });
+          el.appendChild(document.createTextNode(" "));
+          el.appendChild(btn);
+        }
+      }
+      function choose(btn) {
+        const isCorrect = btn.dataset.correct === "1";
+        if (isCorrect) {
+          if (!answered) {
+            score++;
+            scoreEl.textContent = "⭐ " + score;
+            answered = true;
+          }
+          const buttons = $$(".answer-btn", qAns);
+          buttons.forEach((b) => {
+            if (b.dataset.correct === "1") {
+              b.classList.add("correct");
+              b.setAttribute("aria-checked", "true");
+            }
+            b.disabled = true;
+          });
+          streak++;
+          if (streak % 3 === 0) {
+            feedbackMsg("יפה מאוד! שלוש תשובות נכונות ברצף 👏", "good");
+          } else {
+            feedbackMsg("כל הכבוד! 🎉", "good");
+          }
+        } else {
+          btn.classList.add("wrong");
+          btn.disabled = true;
+          if ("vibrate" in navigator) {
+            try {
+              navigator.vibrate(40);
+            } catch (e) {}
+          }
+          streak = 0;
+          feedbackMsg("לא נורא — נסו שוב. צריך עזרה?", "bad", true);
+        }
+        saveState();
+      }
+      $("#btnNext").addEventListener("click", () => {
+        qIndex = (qIndex + 1) % QUESTION_BANK.length;
+        renderQuestion();
+      });
+      $("#btnPrev").addEventListener("click", () => {
+        qIndex = (qIndex - 1 + QUESTION_BANK.length) % QUESTION_BANK.length;
+        renderQuestion();
+      });
+      $("#btnHint").addEventListener("click", () => {
+        const current = QUESTION_BANK[qOrder[qIndex]];
+        const el = $(current.ref);
+        if (!el) return;
+        el.classList.add("mark");
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        setTimeout(() => el.classList.remove("mark"), 1400);
+      });
+      $("#btnShuffle").addEventListener("click", () => {
+        qOrder = shuffle([...Array(QUESTION_BANK.length).keys()]);
+        qIndex = 0;
+        renderQuestion();
+        saveState();
+      });
+
+      // ====== התאמות ======
+      const termsEl = $("#terms"),
+        defsEl = $("#defs");
+      let pairs = [],
+        selectedTerm = null,
+        matches = 0;
+      function renderMatch() {
+        matches = 0;
+        $("#matchStatus").textContent = `${matches}/10`;
+        pairs = MATCH_PAIRS.map(([t, d], idx) => ({ id: idx, t, d }));
+        const terms = shuffle(pairs),
+          defs = shuffle(pairs);
+        termsEl.innerHTML = "";
+        defsEl.innerHTML = "";
+        terms.forEach((item) => {
+          const b = document.createElement("button");
+          b.className = "btn chip k-select";
+          b.textContent = item.t;
+          b.dataset.id = item.id;
+          b.setAttribute("aria-pressed", "false");
+          if (canDrag) {
+            b.classList.add("draggable");
+            b.draggable = true;
+          }
+          termsEl.appendChild(b);
+        });
+        defs.forEach((item) => {
+          const b = document.createElement("button");
+          b.className = "btn chip k-select";
+          b.textContent = item.d;
+          b.dataset.id = item.id;
+          b.setAttribute("aria-pressed", "false");
+          if (canDrag) {
+            b.classList.add("droppable");
+          }
+          defsEl.appendChild(b);
+        });
+        const note = $("#matchNote");
+        if (note) {
+          note.textContent = canDrag
+            ? "גררו בעכבר, או בחרו במקלדת: בחרו מושג (Enter) ואז הסבר (Enter). ✅"
+            : "במובייל: הקישו על מושג ואז על ההסבר המתאים – אין צורך לגרור. ✅";
+        }
+        termsEl.addEventListener("click", onPickTerm);
+        defsEl.addEventListener("click", onPickDef);
+        termsEl.addEventListener("keyup", (e) => {
+          if (
+            e.target.matches(".k-select") &&
+            (e.key === "Enter" || e.key === " ")
+          )
+            onPickTerm(e);
+        });
+        defsEl.addEventListener("keyup", (e) => {
+          if (
+            e.target.matches(".k-select") &&
+            (e.key === "Enter" || e.key === " ")
+          )
+            onPickDef(e);
+        });
+        if (canDrag) {
+          $$(".draggable", termsEl).forEach((el) => {
+            el.addEventListener("dragstart", (e) => {
+              e.dataTransfer.setData("text/plain", el.dataset.id);
+              selectedTerm = el;
+              el.classList.add("active");
+            });
+            el.addEventListener("dragend", () => {
+              if (selectedTerm) selectedTerm.classList.remove("active");
+              selectedTerm = null;
+            });
+          });
+          $$(".droppable", defsEl).forEach((el) => {
+            el.addEventListener("dragover", (e) => e.preventDefault());
+            el.addEventListener("drop", (e) => {
+              e.preventDefault();
+              const id = e.dataTransfer.getData("text/plain");
+              tryMatch(id, el.dataset.id, selectedTerm, el);
+            });
+          });
+        }
+      }
+      function onPickTerm(e) {
+        const btn = e.target.closest(".k-select");
+        if (!btn) return;
+        $$(".k-select", termsEl).forEach((b) =>
+          b.setAttribute("aria-pressed", "false")
+        );
+        btn.setAttribute("aria-pressed", "true");
+        selectedTerm = btn;
+      }
+      function onPickDef(e) {
+        const btn = e.target.closest(".k-select");
+        if (!btn || !selectedTerm) return;
+        tryMatch(selectedTerm.dataset.id, btn.dataset.id, selectedTerm, btn);
+      }
+      function tryMatch(id1, id2, termBtn, defBtn) {
+        if (id1 === id2) {
+          termBtn.classList.add("good");
+          defBtn.classList.add("good");
+          termBtn.disabled = true;
+          defBtn.disabled = true;
+          matches++;
+          $("#matchStatus").textContent = `${matches}/10`;
+          saveState();
+        } else {
+          termBtn.classList.add("bad");
+          defBtn.classList.add("bad");
+          setTimeout(() => {
+            termBtn.classList.remove("bad");
+            defBtn.classList.remove("bad");
+          }, 600);
+        }
+      }
+
+      // ====== כרטיסיות ======
+      let fIndex = 0,
+        flipped = false,
+        known = new Set();
+      function renderFlash() {
+        const item = FLASH_TERMS[fIndex];
+        const front = $("#flashFront"),
+          back = $("#flashBack");
+        if (front) front.innerHTML = `<span>${item.term}</span>`;
+        if (back) back.innerHTML = `<span>${item.def}</span>`;
+        $("#flash").classList.toggle("flipped", flipped);
+        $("#flashMeter").textContent = `${fIndex + 1} / ${FLASH_TERMS.length}`;
+      }
+      $("#flash").addEventListener("click", () => {
+        flipped = !flipped;
+        renderFlash();
+      });
+      $("#flashFlip").addEventListener("click", () => {
+        flipped = !flipped;
+        renderFlash();
+      });
+      $("#flashPrev").addEventListener("click", () => {
+        fIndex = (fIndex - 1 + FLASH_TERMS.length) % FLASH_TERMS.length;
+        flipped = false;
+        renderFlash();
+      });
+      $("#flashNext").addEventListener("click", () => {
+        fIndex = (fIndex + 1) % FLASH_TERMS.length;
+        flipped = false;
+        renderFlash();
+      });
+      $("#flashIKnow").addEventListener("click", () => {
+        known.add(fIndex);
+        $("#flash").classList.add("good");
+        setTimeout(() => $("#flash").classList.remove("good"), 400);
+        saveState();
+      });
+      $("#flashIDont").addEventListener("click", () => {
+        known.delete(fIndex);
+        $("#flash").classList.add("bad");
+        setTimeout(() => $("#flash").classList.remove("bad"), 400);
+        saveState();
+      });
+
+      // ====== לשוניות ======
+      $$(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          $$(".tab").forEach((t) => t.setAttribute("aria-selected", "false"));
+          tab.setAttribute("aria-selected", "true");
+          const id = tab.getAttribute("aria-controls");
+          $$(".tabpanels> section").forEach((s) =>
+            s.classList.remove("active")
+          );
+          $("#" + id).classList.add("active");
+        });
+      });
+
+      // ====== שמירה/טעינה ======
+      function saveState() {
+        const state = {
+          fs: getComputedStyle(root).getPropertyValue("--fs"),
+          qIndex,
+          score,
+          known: [...known],
+          matches,
+          qOrder,
+          streak,
+        };
+        localStorage.setItem("ozone_game_state", JSON.stringify(state));
+      }
+      function loadState() {
+        const s = localStorage.getItem("ozone_game_state");
+        if (!s) return;
+        try {
+          const st = JSON.parse(s);
+          if (st.fs) root.style.setProperty("--fs", st.fs);
+          if (Number.isInteger(st.qIndex)) qIndex = st.qIndex;
+          if (Number.isInteger(st.score)) score = st.score;
+          if (Array.isArray(st.known)) known = new Set(st.known);
+          if (Number.isInteger(st.matches)) matches = st.matches;
+          if (Array.isArray(st.qOrder)) qOrder = st.qOrder;
+          if (Number.isInteger(st.streak)) streak = st.streak;
+        } catch (e) {}
+      }
+      $("#reset").addEventListener("click", () => {
+        localStorage.removeItem("ozone_game_state");
+        location.reload();
+      });
+
+      // ====== אתחול ======
+      loadState();
+      if (!Array.isArray(qOrder) || qOrder.length !== QUESTION_BANK.length) {
+        qOrder = shuffle([...Array(QUESTION_BANK.length).keys()]);
+      }
+      renderQuestion();
+      scoreEl.textContent = "⭐ " + score;
+      renderMatch();
+      $("#matchStatus").textContent = `${matches}/10`;
+      renderFlash();
+      const mh = $("#mobileHint"),
+        hideBtn = $("#hideHint");
+      if (hideBtn) {
+        hideBtn.addEventListener("click", () => {
+          mh.style.display = "none";
+          localStorage.setItem("ozone_hide_hint", "1");
+        });
+      }
+      if (localStorage.getItem("ozone_hide_hint") === "1") {
+        if (mh) mh.style.display = "none";
+      }
+      updateHitMeters();
+
+      // ====== בדיקת רגרסיה מינימלית (קונסול בלבד) ======
+      (() => {
+        try {
+          ["O3", "UVB", "CFCs", "O3 / [x] + ? * ."].forEach((s) => doSearch(s));
+          resetSearchInputs();
+          console.log("Search smoke-test: OK");
+        } catch (e) {
+          console.warn("Search test FAIL:", e.message);
+        }
+      })();
+    </script>
+  </body>
+</html>
