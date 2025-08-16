@@ -464,70 +464,136 @@
       }
       /* שיפורי מובייל לכרטיסיות */
       @media (max-width: 600px) {
-        .flash {
-          min-height: 150px;
+        body {
+          font-size: 18px;
+          padding: 0;
         }
-        .flash .face {
-          padding: 16px;
-          font-size: clamp(1rem, 3.8vw, 1.15rem);
-          text-align: center;
+        .app {
+          padding: 4px;
+          gap: 8px;
         }
-      }
-      /* שיפורי מובייל להתאמות */
-      @media (max-width: 600px) {
-        #matchGrid .btn.chip {
-          min-height: 44px;
-          font-size: 1rem;
+        .panel {
+          border-radius: 10px;
+          box-shadow: 0 4px 12px #00000010;
+          padding: 0;
         }
-      }
-      /* Mobile polish */
-      @media (max-width: 600px) {
-        .status {
-          flex-wrap: wrap;
-          align-items: flex-start;
+        .activities {
+          padding: 8px 4px;
+        }
+        .toolbar,
+        .topbar {
+          flex-direction: column;
+          gap: 4px;
+          padding: 8px 4px;
+        }
+        .toolbar .group,
+        .topbar .group {
+          gap: 4px;
+        }
+        .tabs {
+          gap: 2px;
+          padding-bottom: 4px;
+          margin-bottom: 6px;
+        }
+        .tab {
+          font-size: 1.05rem;
+          padding: 7px 8px;
+          border-radius: 8px;
+        }
+        .tab[aria-selected="true"] {
+          outline-width: 1.5px;
+        }
+        .quiz-card,
+        .match-card,
+        .flash-card {
+          padding: 10px 4px;
+          margin-block: 8px;
+        }
+        .question {
+          font-size: 1.1rem;
+        }
+        .answers {
           gap: 6px;
         }
-        .status .group {
-          margin-inline-start: auto;
+        .btn {
+          font-size: 1rem;
+          min-height: 38px;
+          padding: 8px 10px;
+          border-radius: 10px;
+        }
+        .btn.small {
+          font-size: 0.95rem;
+          min-height: 34px;
+          padding: 5px 8px;
+        }
+        .chip {
+          font-size: 1rem;
+          min-height: 38px;
+          padding: 5px 8px;
+        }
+        .pill {
+          font-size: 0.95rem;
+          padding: 5px 8px;
+        }
+        .status {
+          font-size: 1rem;
+          gap: 4px;
         }
         .note {
-          white-space: normal;
-        }
-        .mobile-hint {
-          flex-wrap: wrap;
-          align-items: flex-start;
-          width: 100%;
-          white-space: normal;
-          word-break: normal;
-          overflow-wrap: anywhere;
-          line-height: 1.5;
-        }
-        .mobile-hint .kbd {
-          white-space: nowrap;
-        }
-        .match-card,
-        #matchGrid,
-        #terms,
-        #defs {
-          position: relative;
-          z-index: 2;
+          font-size: 0.98rem;
         }
         .flash {
-          z-index: 0;
+          min-height: 120px;
         }
-        #matchGrid .btn.chip {
-          width: 100%;
-          min-height: 44px;
+        .flash .face {
+          padding: 12px;
           font-size: 1rem;
         }
+        .flash-ctrl {
+          gap: 4px;
+          margin-top: 8px;
+        }
+        .mobile-hint {
+          font-size: 1rem;
+          padding: 8px 6px;
+          gap: 4px;
+        }
+        .section-title {
+          font-size: 1.05rem;
+          gap: 0.3em;
+        }
+        #textPanel {
+          padding: 10px 4px;
+        }
+        #textContainer {
+          padding: 0;
+        }
+        #article {
+          padding: 0;
+        }
+        h1,
+        h2,
+        h3 {
+          font-size: 1.15rem;
+        }
+        .collapsible {
+          padding: 0;
+        }
       }
-      /* חיפוש: הדגשה בלבד – בלי חיצים */
-      #prevHit,
-      #nextHit,
-      #prevHit2,
-      #nextHit2 {
-        display: none;
+      @media (max-width: 400px) {
+        body {
+          font-size: 16px;
+        }
+        .btn,
+        .chip,
+        .tab {
+          font-size: 0.95rem;
+        }
+        .mobile-hint {
+          font-size: 0.95rem;
+        }
       }
+      /* ...existing code... */
     </style>
   </head>
   <body>
